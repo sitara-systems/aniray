@@ -1,5 +1,7 @@
 Aniray
 ======
+2023 March 19 - Added github workflow
+
 [Aniray](https://github.com/HypersonicED/aniray) is a library for animating and
 orchestrating large arrays of emitters, actuators, displays, and more.
 
