@@ -27,47 +27,48 @@
 #ifndef ANIRAY_NODEARRAYOUTPUT_HPP
 #define ANIRAY_NODEARRAYOUTPUT_HPP
 
+#include <aniray/DMXAddr.hpp>
 #include <cstdint>
 #include <memory>
 
-#include <aniray/DMXAddr.hpp>
-
 namespace aniray {
 
-template <typename NodeArrayT, auto DataToOutput> class NodeArrayOutput {
-public:
-  using InnerNodeArrayT = NodeArrayT;
+template <typename NodeArrayT, auto DataToOutput>
+class NodeArrayOutput {
+   public:
+    using InnerNodeArrayT = NodeArrayT;
 
-  NodeArrayOutput(NodeArrayT &nodeArray) : mNodeArray{nodeArray} {}
+    NodeArrayOutput(NodeArrayT& nodeArray) : mNodeArray{nodeArray} {}
 
-  auto updateAndSend() -> bool {
-    using NodeT = typename InnerNodeArrayT::InnerNodeT;
-    using DataT = typename InnerNodeArrayT::InnerNodeT::InnerDataT;
-    for (std::shared_ptr<NodeT> node : mNodeArray.nodes()) {
-      if (node->ignore()) {
-        continue;
-      }
-      DMXAddr addr = node->addr();
-      DataT data = node->data();
-      auto output = DataToOutput(data);
-      for (int i = 0; i < sizeof(output); i++) {
-        setChannel(addr.mUniverse, (addr.mAddr - 1) + i, output[i]);
-      }
+    auto updateAndSend() -> bool {
+        using NodeT = typename InnerNodeArrayT::InnerNodeT;
+        using DataT = typename InnerNodeArrayT::InnerNodeT::InnerDataT;
+        for (std::shared_ptr<NodeT> node : mNodeArray.nodes()) {
+            if (node->ignore()) {
+                continue;
+            }
+            DMXAddr addr = node->addr();
+            DataT data = node->data();
+            auto output = DataToOutput(data);
+            for (int i = 0; i < sizeof(output); i++) {
+                setChannel(addr.mUniverse, (addr.mAddr - 1) + i, output[i]);
+            }
+        }
+        return sendData();
     }
-    return sendData();
-  }
 
-  auto nodeArray() const -> NodeArrayT & { return mNodeArray; }
+    auto nodeArray() const -> NodeArrayT& { return mNodeArray; }
 
-protected:
-  virtual void setChannel(std::uint32_t universe, std::uint8_t channel,
-                          std::uint8_t data) {}
-  virtual auto sendData() -> bool { return false; }
+   protected:
+    virtual void setChannel(std::uint32_t universe,
+                            std::uint8_t channel,
+                            std::uint8_t data) {}
+    virtual auto sendData() -> bool { return false; }
 
-private:
-  NodeArrayT &mNodeArray;
+   private:
+    NodeArrayT& mNodeArray;
 };
 
-} // namespace aniray
+}  // namespace aniray
 
-#endif // ANIRAY_NODEARRAYOUTPUT_HPP
+#endif  // ANIRAY_NODEARRAYOUTPUT_HPP

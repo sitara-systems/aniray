@@ -27,40 +27,40 @@
 #ifndef ANIRAY_NODEANIMATION_HPP
 #define ANIRAY_NODEANIMATION_HPP
 
-#include <cstddef>
-#include <limits>
-#include <typeinfo>
-
 #include <boost/log/core/record.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/preprocessor/seq/enum.hpp>
 #include <boost/preprocessor/seq/size.hpp>
+#include <cstddef>
+#include <limits>
+#include <typeinfo>
 
 namespace aniray {
 
 using std::size_t;
 
-template <typename NodeArrayT> class NodeAnimation {
-public:
-  using InnerNodeArrayT = NodeArrayT;
+template <typename NodeArrayT>
+class NodeAnimation {
+   public:
+    using InnerNodeArrayT = NodeArrayT;
 
-  NodeAnimation(NodeArrayT &nodeArray) : mNodeArray{nodeArray} {}
+    NodeAnimation(NodeArrayT& nodeArray) : mNodeArray{nodeArray} {}
 
-  virtual void frame([[maybe_unused]] double milliseconds) {
-    if (++mFrameCount == 0) {
-      BOOST_LOG_TRIVIAL(debug)
-          << typeid(*this).name() << ": Frame count looping to 0.";
+    virtual void frame([[maybe_unused]] double milliseconds) {
+        if (++mFrameCount == 0) {
+            BOOST_LOG_TRIVIAL(debug)
+                << typeid(*this).name() << ": Frame count looping to 0.";
+        }
     }
-  }
 
-protected:
-  size_t mFrameCount = std::numeric_limits<size_t>::
-      max(); // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes)
-  NodeArrayT &
-      mNodeArray; // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes)
+   protected:
+    size_t mFrameCount = std::numeric_limits<size_t>::
+        max();  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes)
+    NodeArrayT&
+        mNodeArray;  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes)
 };
 
-} // namespace aniray
+}  // namespace aniray
 
-#endif // ANIRAY_NODEANIMATION_HPP
+#endif  // ANIRAY_NODEANIMATION_HPP

@@ -27,12 +27,11 @@
 #ifndef ANIRAY_GEOMETRY_HPP
 #define ANIRAY_GEOMETRY_HPP
 
-#include <cstddef>
-
 #include <boost/geometry/core/cs.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/multi_point.hpp>
 #include <boost/geometry/geometries/point_xyz.hpp>
+#include <cstddef>
 // IWYU pragma: no_forward_declare boost::geometry::cs::cartesian
 
 namespace aniray {
@@ -46,6 +45,6 @@ using PointGridIndex =
 using MultiPoint = boost::geometry::model::multi_point<Point>;
 using Box = boost::geometry::model::box<Point>;
 
-} // namespace aniray
+}  // namespace aniray
 
-#endif // ANIRAY_GEOMETRY_HPP
+#endif  // ANIRAY_GEOMETRY_HPP

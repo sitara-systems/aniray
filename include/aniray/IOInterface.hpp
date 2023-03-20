@@ -37,24 +37,25 @@
 
 namespace aniray::IOInterface {
 
-template <typename InputType> class IOInterfaceInput {
-public:
-  virtual auto getValues() const -> std::vector<InputType> {
-    const std::shared_lock<std::shared_mutex> lock(mMutex);
-    return mValues;
-  }
-  virtual auto hasValues() const -> bool {
-    const std::shared_lock<std::shared_mutex> lock(mMutex);
-    return !mValues.empty();
-  }
-  void setValues(std::vector<InputType> values) {
-    const std::unique_lock<std::shared_mutex> lock(mMutex);
-    mValues = std::move(values);
-  }
+template <typename InputType>
+class IOInterfaceInput {
+   public:
+    virtual auto getValues() const -> std::vector<InputType> {
+        const std::shared_lock<std::shared_mutex> lock(mMutex);
+        return mValues;
+    }
+    virtual auto hasValues() const -> bool {
+        const std::shared_lock<std::shared_mutex> lock(mMutex);
+        return !mValues.empty();
+    }
+    void setValues(std::vector<InputType> values) {
+        const std::unique_lock<std::shared_mutex> lock(mMutex);
+        mValues = std::move(values);
+    }
 
-private:
-  mutable std::shared_mutex mMutex;
-  std::vector<InputType> mValues;
+   private:
+    mutable std::shared_mutex mMutex;
+    std::vector<InputType> mValues;
 };
 
 // NOTE: vector<bool> is space-efficient:
@@ -62,21 +63,21 @@ private:
 using IOInterfaceInputDiscrete = IOInterfaceInput<bool>;
 
 class IOInterfaceGeneric {
-public:
-  [[nodiscard]] auto getInputsDiscrete(const std::string &name) const
-      -> std::shared_ptr<IOInterfaceInputDiscrete>;
-  virtual void refreshInputs() = 0;
+   public:
+    [[nodiscard]] auto getInputsDiscrete(const std::string& name) const
+        -> std::shared_ptr<IOInterfaceInputDiscrete>;
+    virtual void refreshInputs() = 0;
 
-protected:
-  void assignInputDiscrete(const std::string &name,
-                           std::shared_ptr<IOInterfaceInputDiscrete> input);
+   protected:
+    void assignInputDiscrete(const std::string& name,
+                             std::shared_ptr<IOInterfaceInputDiscrete> input);
 
-private:
-  mutable std::shared_mutex mMutexInputsDiscrete;
-  std::unordered_map<std::string, std::shared_ptr<IOInterfaceInputDiscrete>>
-      mInputsDiscrete;
+   private:
+    mutable std::shared_mutex mMutexInputsDiscrete;
+    std::unordered_map<std::string, std::shared_ptr<IOInterfaceInputDiscrete>>
+        mInputsDiscrete;
 };
 
-} // namespace aniray::IOInterface
+}  // namespace aniray::IOInterface
 
-#endif // ANIRAY_IOINTERFACE_HPP
+#endif  // ANIRAY_IOINTERFACE_HPP

@@ -28,8 +28,8 @@
 
 namespace aniray {
 
-auto operator<<(std::ostream &out, const DMXAddr &d) -> std::ostream & {
-  return out << "universe: " << d.mUniverse << " address: " << int(d.mAddr);
+auto operator<<(std::ostream& out, const DMXAddr& d) -> std::ostream& {
+    return out << "universe: " << d.mUniverse << " address: " << int(d.mAddr);
 }
 
-} // namespace aniray
+}  // namespace aniray
