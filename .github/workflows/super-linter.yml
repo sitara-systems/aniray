@@ -86,8 +86,7 @@ jobs:
           PYTHON_ISORT_CONFIG_FILE: pyproject.toml
           PYTHON_FLAKE8_CONFIG_FILE: .flake8
           JAVASCRIPT_DEFAULT_STYLE: prettier
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_PYTHON_MYPY: false
+          VALIDATE_ALL_CODEBASE: true
           VALIDATE_CPP: true
           VALIDATE_CLANG_FORMAT: true
           DEFAULT_BRANCH: main
