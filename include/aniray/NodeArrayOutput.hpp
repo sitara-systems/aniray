@@ -57,9 +57,7 @@ public:
     return sendData();
   }
 
-  auto nodeArray() const -> NodeArrayT & {
-    return mNodeArray;
-  }
+  auto nodeArray() const -> NodeArrayT & { return mNodeArray; }
 
 protected:
   virtual void setChannel(std::uint32_t universe, std::uint8_t channel,

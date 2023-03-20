@@ -58,26 +58,26 @@ using std::uint32_t;
 using std::uint8_t;
 
 class NodeArrayOutputOLAThread : public ola::thread::Thread {
-  public:
-    NodeArrayOutputOLAThread(const Options &options);
+public:
+  NodeArrayOutputOLAThread(const Options &options);
 
-    auto Start(const ola::TimeInterval &period,
-               std::unordered_map<uint32_t, size_t> &universesToBuffers) -> bool;
-    void Stop();
-    auto GetSelectServer() -> ola::io::SelectServer*;
-    void updateData(std::vector<ola::DmxBuffer> buffers);
+  auto Start(const ola::TimeInterval &period,
+             std::unordered_map<uint32_t, size_t> &universesToBuffers) -> bool;
+  void Stop();
+  auto GetSelectServer() -> ola::io::SelectServer *;
+  void updateData(std::vector<ola::DmxBuffer> buffers);
 
-  protected:
-    auto Run() -> void* override;
+protected:
+  auto Run() -> void * override;
 
-  private:
-    ola::client::OlaClientWrapper mOLAClientWrapper;
-    ola::TimeInterval mPeriod;
-    std::unordered_map<uint32_t, size_t> mUniversesToBuffers;
-    std::vector<ola::DmxBuffer> mBuffers;
-    std::mutex mUpdateMutex;
+private:
+  ola::client::OlaClientWrapper mOLAClientWrapper;
+  ola::TimeInterval mPeriod;
+  std::unordered_map<uint32_t, size_t> mUniversesToBuffers;
+  std::vector<ola::DmxBuffer> mBuffers;
+  std::mutex mUpdateMutex;
 
-    auto InternalSendUniverses() -> bool;
+  auto InternalSendUniverses() -> bool;
 };
 
 template <typename NodeArrayT, auto DataToOutput>
@@ -87,12 +87,13 @@ public:
   using NodeArrayOutput<NodeArrayT, DataToOutput>::updateAndSend;
   using NodeArrayOutput<NodeArrayT, DataToOutput>::nodeArray;
 
-  NodeArrayOutputOLA(NodeArrayT & nodes, int64_t interval)
+  NodeArrayOutputOLA(NodeArrayT &nodes, int64_t interval)
       : NodeArrayOutput<NodeArrayT, DataToOutput>::NodeArrayOutput(nodes) {
     using NodeT = typename InnerNodeArrayT::InnerNodeT;
     ola::InitLogging(ola::OLA_LOG_WARN, ola::OLA_LOG_STDERR);
 
-    for (std::shared_ptr<NodeT> node : NodeArrayOutput<NodeArrayT, DataToOutput>::nodeArray().nodes()) {
+    for (std::shared_ptr<NodeT> node :
+         NodeArrayOutput<NodeArrayT, DataToOutput>::nodeArray().nodes()) {
       DMXAddr addr = node->addr();
       if (mUniversesToBuffers.count(addr.mUniverse) < 1) {
         mBuffers.emplace_back();
@@ -107,7 +108,8 @@ public:
     ola::thread::Thread::Options threadOptions("Aniray_NAOutOLA");
     mOLAThread = std::make_unique<NodeArrayOutputOLAThread>(threadOptions);
     if (!mOLAThread->Start(ola::TimeInterval(interval), mUniversesToBuffers)) {
-      throw std::runtime_error("NodeArrayOutputOLA: Error setting up OLA thread!");
+      throw std::runtime_error(
+          "NodeArrayOutputOLA: Error setting up OLA thread!");
     }
     BOOST_LOG_TRIVIAL(info) << "NodeArrayOutputOLA: Connected to OLA";
   }
@@ -117,12 +119,15 @@ public:
     mOLAThread->Join();
   }
 
-  NodeArrayOutputOLA(NodeArrayOutputOLA&) = delete; // copy constructor
-  NodeArrayOutputOLA(const NodeArrayOutputOLA&) = delete; // copy constructor
-  NodeArrayOutputOLA(NodeArrayOutputOLA&&) = delete;  // move constructor
-  auto operator=(NodeArrayOutputOLA&) -> NodeArrayOutputOLA& = delete;  // copy assignment
-  auto operator=(const NodeArrayOutputOLA&) -> NodeArrayOutputOLA& = delete;  // copy assignment
-  auto operator=(NodeArrayOutputOLA&&) noexcept -> NodeArrayOutputOLA& = default;  // move assignment
+  NodeArrayOutputOLA(NodeArrayOutputOLA &) = delete;       // copy constructor
+  NodeArrayOutputOLA(const NodeArrayOutputOLA &) = delete; // copy constructor
+  NodeArrayOutputOLA(NodeArrayOutputOLA &&) = delete;      // move constructor
+  auto operator=(NodeArrayOutputOLA &)
+      -> NodeArrayOutputOLA & = delete; // copy assignment
+  auto operator=(const NodeArrayOutputOLA &)
+      -> NodeArrayOutputOLA & = delete; // copy assignment
+  auto operator=(NodeArrayOutputOLA &&) noexcept
+      -> NodeArrayOutputOLA & = default; // move assignment
 
 private:
   std::unordered_map<uint32_t, size_t> mUniversesToBuffers;

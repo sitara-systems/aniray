@@ -58,7 +58,7 @@ public:
     }
   }
 
-  template <typename sampleFuncT> void sample(sampleFuncT&& sampleFunc) {
+  template <typename sampleFuncT> void sample(sampleFuncT &&sampleFunc) {
     for (auto const &[targetNode, sources] : mSamplerMap) {
       if (targetNode->ignore()) {
         continue;

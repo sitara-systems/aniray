@@ -41,44 +41,22 @@ template <class DataT> class Node {
 public:
   using InnerDataT = DataT;
 
-  Node(Point coords, Point rot, DMXAddr addr, bool ignore,
-           float sampleRadius)
-      : mCoords{coords}
-      , mRot{rot}
-      , mInGrid{false}
-      , mGridIndex{PointGridIndex()}
-      , mAddr{addr}
-      , mIgnore{ignore}
-      , mSampleRadius{sampleRadius}
-      , mData{DataT()} {}
-  Node(Point coords, Point rot, PointGridIndex gridIndex,
-           DMXAddr addr, bool ignore, float sampleRadius)
-      : mCoords{coords}
-      , mRot{rot}
-      , mInGrid{true}
-      , mGridIndex{gridIndex}
-      , mAddr{addr}
-      , mIgnore{ignore}
-      , mSampleRadius{sampleRadius}
-      , mData{DataT()} {}
+  Node(Point coords, Point rot, DMXAddr addr, bool ignore, float sampleRadius)
+      : mCoords{coords}, mRot{rot}, mInGrid{false},
+        mGridIndex{PointGridIndex()}, mAddr{addr}, mIgnore{ignore},
+        mSampleRadius{sampleRadius}, mData{DataT()} {}
+  Node(Point coords, Point rot, PointGridIndex gridIndex, DMXAddr addr,
+       bool ignore, float sampleRadius)
+      : mCoords{coords}, mRot{rot}, mInGrid{true},
+        mGridIndex{gridIndex}, mAddr{addr}, mIgnore{ignore},
+        mSampleRadius{sampleRadius}, mData{DataT()} {}
   Node(Point coords, Point rot)
-      : mCoords{coords}
-      , mRot{rot}
-      , mInGrid{false}
-      , mGridIndex{PointGridIndex()}
-      , mAddr{DMXAddr()}
-      , mIgnore{false}
-      , mSampleRadius{0}
-      , mData{DataT()} {}
+      : mCoords{coords}, mRot{rot}, mInGrid{false},
+        mGridIndex{PointGridIndex()}, mAddr{DMXAddr()}, mIgnore{false},
+        mSampleRadius{0}, mData{DataT()} {}
   Node(Point coords, Point rot, PointGridIndex gridIndex)
-      : mCoords{coords}
-      , mRot{rot}
-      , mInGrid{true}
-      , mGridIndex{gridIndex}
-      , mAddr{DMXAddr()}
-      , mIgnore{false}
-      , mSampleRadius{0}
-      , mData{DataT()} {}
+      : mCoords{coords}, mRot{rot}, mInGrid{true}, mGridIndex{gridIndex},
+        mAddr{DMXAddr()}, mIgnore{false}, mSampleRadius{0}, mData{DataT()} {}
 
   friend auto operator<<(std::ostream &out, const Node<DataT> &L)
       -> std::ostream & {
@@ -91,33 +69,15 @@ public:
     return out;
   }
 
-  [[nodiscard]] auto coords() const -> Point {
-    return mCoords;
-  }
-  [[nodiscard]] auto rot() const -> Point {
-    return mRot;
-  }
-  [[nodiscard]] auto inGrid() const -> bool {
-    return mInGrid;
-  }
-  [[nodiscard]] auto gridIndex() const -> PointGridIndex {
-    return mGridIndex;
-  }
-  [[nodiscard]] auto addr() const -> DMXAddr {
-    return mAddr;
-  }
-  [[nodiscard]] auto ignore() const -> bool {
-    return mIgnore;
-  }
-  [[nodiscard]] auto sampleRadius() const -> double {
-    return mSampleRadius;
-  }
-  auto data() const -> DataT {
-    return mData;
-  }
-  void data(DataT newData) {
-    mData = newData;
-  }
+  [[nodiscard]] auto coords() const -> Point { return mCoords; }
+  [[nodiscard]] auto rot() const -> Point { return mRot; }
+  [[nodiscard]] auto inGrid() const -> bool { return mInGrid; }
+  [[nodiscard]] auto gridIndex() const -> PointGridIndex { return mGridIndex; }
+  [[nodiscard]] auto addr() const -> DMXAddr { return mAddr; }
+  [[nodiscard]] auto ignore() const -> bool { return mIgnore; }
+  [[nodiscard]] auto sampleRadius() const -> double { return mSampleRadius; }
+  auto data() const -> DataT { return mData; }
+  void data(DataT newData) { mData = newData; }
 
 private:
   Point mCoords;

@@ -44,9 +44,9 @@
 namespace aniray::IOInterface::Modbus {
 
 enum class ConfigFunctionsAddressLayout {
-    ADDRESS, // each address is an input
-    BITS_LSB, // each bit is an input, first bit is first address
-    SPAN_2_LSB // 16- or 32-bit value over two addresses, LSB
+  ADDRESS,   // each address is an input
+  BITS_LSB,  // each bit is an input, first bit is first address
+  SPAN_2_LSB // 16- or 32-bit value over two addresses, LSB
 };
 struct ConfigInputDiscrete {
   std::string name;
@@ -60,17 +60,15 @@ struct ConfigInputDiscrete {
   std::uint16_t clearStartAddress;
   bool onlyClearSingleAddress;
   bool clearHigh;
-//   std::uint16_t clearNumAddressedItems;
+  //   std::uint16_t clearNumAddressedItems;
 };
 
-enum class InitializeOptionsMode {
-    TCP
-};
+enum class InitializeOptionsMode { TCP };
 
 struct InitializeOptions {
-    InitializeOptionsMode mode;
-    std::string tcpAddress;
-    std::uint16_t tcpPort;
+  InitializeOptionsMode mode;
+  std::string tcpAddress;
+  std::uint16_t tcpPort;
 };
 
 // Not enum to enforce strong typing
@@ -92,83 +90,87 @@ const std::uint8_t CLEAR_BIT_VALUE_HIGH = 1;
 const std::uint16_t CLEAR_REGISTER_VALUE_HIGH = 1;
 
 class IOInterfaceModbus : public aniray::IOInterface::IOInterfaceGeneric {
-    public:
-        IOInterfaceModbus(std::string tcpAddress, std::uint16_t tcpPort);
-        ~IOInterfaceModbus();
+public:
+  IOInterfaceModbus(std::string tcpAddress, std::uint16_t tcpPort);
+  ~IOInterfaceModbus();
 
-        IOInterfaceModbus(IOInterfaceModbus&) = delete; // copy constructor
-        IOInterfaceModbus(const IOInterfaceModbus&) = delete; // copy constructor
-        IOInterfaceModbus(IOInterfaceModbus&&) = delete;  // move constructor
-        auto operator=(IOInterfaceModbus&) -> IOInterfaceModbus& = delete;  // copy assignment
-        auto operator=(const IOInterfaceModbus&) -> IOInterfaceModbus& = delete;  // copy assignment
-        auto operator=(IOInterfaceModbus&&) noexcept -> IOInterfaceModbus& = delete;  // move assignment
+  IOInterfaceModbus(IOInterfaceModbus &) = delete;       // copy constructor
+  IOInterfaceModbus(const IOInterfaceModbus &) = delete; // copy constructor
+  IOInterfaceModbus(IOInterfaceModbus &&) = delete;      // move constructor
+  auto operator=(IOInterfaceModbus &)
+      -> IOInterfaceModbus & = delete; // copy assignment
+  auto operator=(const IOInterfaceModbus &)
+      -> IOInterfaceModbus & = delete; // copy assignment
+  auto operator=(IOInterfaceModbus &&) noexcept
+      -> IOInterfaceModbus & = delete; // move assignment
 
-        void refreshInputs() override;
-        void reconnect();
-        void setupInputDiscrete(const std::string &name,
-                                std::uint8_t slaveID,
+  void refreshInputs() override;
+  void reconnect();
+  void setupInputDiscrete(const std::string &name, std::uint8_t slaveID,
+                          std::uint8_t functionCode,
+                          ConfigFunctionsAddressLayout addressLayout,
+                          std::uint16_t startAddress,
+                          std::uint16_t numAddressedItems);
+  void setupInputDiscrete(const std::string &name, std::uint8_t slaveID,
+                          std::uint8_t functionCode,
+                          ConfigFunctionsAddressLayout addressLayout,
+                          std::uint16_t startAddress,
+                          std::uint16_t numAddressedItems,
+                          std::uint8_t clearFunctionCode,
+                          std::uint16_t clearStartAddress,
+                          bool onlyClearSingleAddress, bool clearHigh);
+  [[nodiscard]] auto modbusInitialized() const -> bool;
+
+private:
+  std::unordered_map<std::string, ConfigInputDiscrete> mInputsDiscreteModbus;
+  mutable std::shared_mutex mMutexModbusInitialize;
+  mutable std::shared_mutex mMutexInputsDiscreteModbus;
+  modbus_t *mCTX;
+  bool mModbusInitialized = false;
+  InitializeOptions mInitializeOptions;
+
+  void initialize();
+  void initConnectionTCP(std::string tcpAddress, std::uint16_t tcpPort);
+  void deInitializeNoLock();
+  void deInitialize();
+  void
+  updateInputDiscreteModbusRead(const ConfigInputDiscrete &configInputDiscrete,
+                                std::vector<std::uint8_t> &dest8,
+                                std::vector<std::uint16_t> &dest16);
+  void updateInputDiscreteModbusClear(
+      const ConfigInputDiscrete &configInputDiscrete);
+  static void updateInputDiscreteModbusTransformAddress(
+      const ConfigInputDiscrete &configInputDiscrete,
+      std::vector<std::uint8_t> &dest8, std::vector<std::uint16_t> &dest16,
+      std::vector<bool> &out);
+  static void updateInputDiscreteModbusTransformBitsLSB(
+      const ConfigInputDiscrete &configInputDiscrete,
+      std::vector<std::uint8_t> &dest8, std::vector<std::uint16_t> &dest16,
+      std::vector<bool> &out);
+  static void updateInputDiscreteModbusTransformSpan2LSB(
+      const ConfigInputDiscrete &configInputDiscrete,
+      std::vector<std::uint8_t> &dest8, std::vector<std::uint16_t> &dest16,
+      std::vector<bool> &out);
+  void updateInputDiscrete(const ConfigInputDiscrete &configInputDiscrete);
+  void setupInputDiscreteNoLock(const std::string &name, std::uint8_t slaveID,
                                 std::uint8_t functionCode,
                                 ConfigFunctionsAddressLayout addressLayout,
                                 std::uint16_t startAddress,
                                 std::uint16_t numAddressedItems);
-        void setupInputDiscrete(const std::string &name,
-                                std::uint8_t slaveID,
-                                std::uint8_t functionCode,
-                                ConfigFunctionsAddressLayout addressLayout,
-                                std::uint16_t startAddress,
-                                std::uint16_t numAddressedItems,
-                                std::uint8_t clearFunctionCode,
-                                std::uint16_t clearStartAddress,
-                                bool onlyClearSingleAddress,
-                                bool clearHigh);
-        [[nodiscard]] auto modbusInitialized() const -> bool;
 
-    private:
-        std::unordered_map<std::string, ConfigInputDiscrete> mInputsDiscreteModbus;
-        mutable std::shared_mutex mMutexModbusInitialize;
-        mutable std::shared_mutex mMutexInputsDiscreteModbus;
-        modbus_t *mCTX;
-        bool mModbusInitialized = false;
-        InitializeOptions mInitializeOptions;
-
-        void initialize();
-        void initConnectionTCP(std::string tcpAddress, std::uint16_t tcpPort);
-        void deInitializeNoLock();
-        void deInitialize();
-        void updateInputDiscreteModbusRead(const ConfigInputDiscrete &configInputDiscrete,
-                                           std::vector<std::uint8_t> &dest8,
-                                           std::vector<std::uint16_t> &dest16);
-        void updateInputDiscreteModbusClear(const ConfigInputDiscrete &configInputDiscrete);
-        static void updateInputDiscreteModbusTransformAddress(const ConfigInputDiscrete &configInputDiscrete,
-                                                              std::vector<std::uint8_t> &dest8,
-                                                              std::vector<std::uint16_t> &dest16,
-                                                              std::vector<bool> &out);
-        static void updateInputDiscreteModbusTransformBitsLSB(const ConfigInputDiscrete &configInputDiscrete,
-                                                              std::vector<std::uint8_t> &dest8,
-                                                              std::vector<std::uint16_t> &dest16,
-                                                              std::vector<bool> &out);
-        static void updateInputDiscreteModbusTransformSpan2LSB(const ConfigInputDiscrete &configInputDiscrete,
-                                                               std::vector<std::uint8_t> &dest8,
-                                                               std::vector<std::uint16_t> &dest16,
-                                                               std::vector<bool> &out);
-        void updateInputDiscrete(const ConfigInputDiscrete &configInputDiscrete);
-        void setupInputDiscreteNoLock(const std::string &name,
-                                      std::uint8_t slaveID,
-                                      std::uint8_t functionCode,
-                                      ConfigFunctionsAddressLayout addressLayout,
-                                      std::uint16_t startAddress,
-                                      std::uint16_t numAddressedItems);
-
-        // void updateInputsCounter(ConfigFunction functionConfig) {}
+  // void updateInputsCounter(ConfigFunction functionConfig) {}
 };
 
-class IOInterfaceModbusPeriodicThread : public IOInterfaceModbus, public PeriodicThread {
-    public:
-        IOInterfaceModbusPeriodicThread(std::string tcpAddress, std::uint16_t tcpPort, std::chrono::milliseconds updateRateMs);
-        auto refreshHasErrored() -> bool;
-    private:
-        void periodicAction() override;
-        std::atomic<bool> mRefreshError = false;
+class IOInterfaceModbusPeriodicThread : public IOInterfaceModbus,
+                                        public PeriodicThread {
+public:
+  IOInterfaceModbusPeriodicThread(std::string tcpAddress, std::uint16_t tcpPort,
+                                  std::chrono::milliseconds updateRateMs);
+  auto refreshHasErrored() -> bool;
+
+private:
+  void periodicAction() override;
+  std::atomic<bool> mRefreshError = false;
 };
 
 } // namespace aniray::IOInterface::Modbus

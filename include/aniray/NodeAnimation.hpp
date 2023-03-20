@@ -55,8 +55,10 @@ public:
   }
 
 protected:
-  size_t mFrameCount = std::numeric_limits<size_t>::max(); // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes)
-  NodeArrayT &mNodeArray; // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes)
+  size_t mFrameCount = std::numeric_limits<size_t>::
+      max(); // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes)
+  NodeArrayT &
+      mNodeArray; // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes,misc-non-private-member-variables-in-classes)
 };
 
 } // namespace aniray

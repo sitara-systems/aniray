@@ -37,37 +37,42 @@
 
 namespace aniray {
 
-class PeriodicThread { // NOLINT(cppcoreguidelines-special-member-functions,hicpp-special-member-functions)
-    public:
-        PeriodicThread(std::chrono::milliseconds updateRateMs);
-        ~PeriodicThread();
-        PeriodicThread(PeriodicThread&) = delete; // copy constructor
-        PeriodicThread(const PeriodicThread&) = delete; // copy constructor
-        PeriodicThread(PeriodicThread&&) = delete;  // move constructor
-        auto operator=(PeriodicThread&) -> PeriodicThread& = delete;  // copy assignment
-        auto operator=(const PeriodicThread&) -> PeriodicThread& = delete;  // copy assignment
-        // auto operator=(PeriodicThread&&) noexcept -> PeriodicThread& = default;  // move assignment
-        // move assignment implicitly deleted by boost::asio::io_context (-Wdefaulted-function-deleted)
+class
+    PeriodicThread { // NOLINT(cppcoreguidelines-special-member-functions,hicpp-special-member-functions)
+public:
+  PeriodicThread(std::chrono::milliseconds updateRateMs);
+  ~PeriodicThread();
+  PeriodicThread(PeriodicThread &) = delete;       // copy constructor
+  PeriodicThread(const PeriodicThread &) = delete; // copy constructor
+  PeriodicThread(PeriodicThread &&) = delete;      // move constructor
+  auto operator=(PeriodicThread &)
+      -> PeriodicThread & = delete; // copy assignment
+  auto operator=(const PeriodicThread &)
+      -> PeriodicThread & = delete; // copy assignment
+  // auto operator=(PeriodicThread&&) noexcept -> PeriodicThread& = default;  //
+  // move assignment move assignment implicitly deleted by
+  // boost::asio::io_context (-Wdefaulted-function-deleted)
 
-        void start();
-        void stop();
-        [[nodiscard]] auto running() const -> bool;
+  void start();
+  void stop();
+  [[nodiscard]] auto running() const -> bool;
 
-        auto updateRate() const -> std::chrono::milliseconds;
-        void updateRate(std::chrono::milliseconds updateRateMs);
+  auto updateRate() const -> std::chrono::milliseconds;
+  void updateRate(std::chrono::milliseconds updateRateMs);
 
-    protected:
-        virtual void periodicAction() = 0;
-    private:
-        bool mWasRunning = false;
-        bool mRunning = false;
-        std::chrono::milliseconds mUpdateRateMs;
-        boost::asio::io_context mIOContext;
-        std::unique_ptr<boost::asio::steady_timer> mTimer;
-        std::unique_ptr<boost::thread> mIOThread;
-        mutable std::shared_mutex mUpdateRateMutex;
+protected:
+  virtual void periodicAction() = 0;
 
-        void timerHandler();
+private:
+  bool mWasRunning = false;
+  bool mRunning = false;
+  std::chrono::milliseconds mUpdateRateMs;
+  boost::asio::io_context mIOContext;
+  std::unique_ptr<boost::asio::steady_timer> mTimer;
+  std::unique_ptr<boost::thread> mIOThread;
+  mutable std::shared_mutex mUpdateRateMutex;
+
+  void timerHandler();
 };
 
 } // namespace aniray

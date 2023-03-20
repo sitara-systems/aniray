@@ -33,7 +33,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/system/error_code.hpp> // IWYU pragma: keep
-#include <boost/thread.hpp> // IWYU pragma: keep
+#include <boost/thread.hpp>            // IWYU pragma: keep
 // IWYU pragma: no_include <boost/asio/basic_waitable_timer.hpp>
 // IWYU pragma: no_include <boost/thread/thread_only.hpp>
 // IWYU pragma: no_forward_declare boost::system::error_code
@@ -44,54 +44,55 @@ namespace aniray {
 
 PeriodicThread::PeriodicThread(std::chrono::milliseconds updateRateMs)
     : mUpdateRateMs(updateRateMs) {
-    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard(mIOContext.get_executor());
-    mTimer = std::make_unique<boost::asio::steady_timer>(
-        mIOContext,
-        std::chrono::steady_clock::now() + mUpdateRateMs);
-    mTimer->async_wait([this] (const boost::system::error_code&) { timerHandler(); });
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+      work_guard(mIOContext.get_executor());
+  mTimer = std::make_unique<boost::asio::steady_timer>(
+      mIOContext, std::chrono::steady_clock::now() + mUpdateRateMs);
+  mTimer->async_wait(
+      [this](const boost::system::error_code &) { timerHandler(); });
 }
 
 void PeriodicThread::start() {
-    if (mWasRunning) {
-        mIOContext.restart();
-    } else {
-        mIOThread = std::make_unique<boost::thread>([ObjectPtr = &mIOContext] { ObjectPtr->run(); });
-    }
-    mWasRunning = true;
-    mRunning = true;
+  if (mWasRunning) {
+    mIOContext.restart();
+  } else {
+    mIOThread = std::make_unique<boost::thread>(
+        [ObjectPtr = &mIOContext] { ObjectPtr->run(); });
+  }
+  mWasRunning = true;
+  mRunning = true;
 }
 
 void PeriodicThread::stop() {
-    mIOContext.stop();
-    mRunning = false;
+  mIOContext.stop();
+  mRunning = false;
 }
 
-[[nodiscard]] auto PeriodicThread::running() const -> bool {
-    return mRunning;
-}
+[[nodiscard]] auto PeriodicThread::running() const -> bool { return mRunning; }
 
 auto PeriodicThread::updateRate() const -> std::chrono::milliseconds {
-    const std::shared_lock<std::shared_mutex> lock(mUpdateRateMutex);
-    return mUpdateRateMs;
+  const std::shared_lock<std::shared_mutex> lock(mUpdateRateMutex);
+  return mUpdateRateMs;
 }
 
 void PeriodicThread::updateRate(std::chrono::milliseconds updateRateMs) {
-    const std::unique_lock<std::shared_mutex> lock(mUpdateRateMutex);
-    mUpdateRateMs = updateRateMs;
+  const std::unique_lock<std::shared_mutex> lock(mUpdateRateMutex);
+  mUpdateRateMs = updateRateMs;
 }
 
 PeriodicThread::~PeriodicThread() {
-   stop();
-    // if (mIOThread->joinable()) {
-    //     mIOThread->join();
-    // }
+  stop();
+  // if (mIOThread->joinable()) {
+  //     mIOThread->join();
+  // }
 }
 
-void PeriodicThread::timerHandler () {
-    periodicAction();
-    const std::shared_lock<std::shared_mutex> lock(mUpdateRateMutex);
-    mTimer->expires_at(mTimer->expiry() + mUpdateRateMs);
-    mTimer->async_wait([this] (const boost::system::error_code&) { timerHandler(); });
+void PeriodicThread::timerHandler() {
+  periodicAction();
+  const std::shared_lock<std::shared_mutex> lock(mUpdateRateMutex);
+  mTimer->expires_at(mTimer->expiry() + mUpdateRateMs);
+  mTimer->async_wait(
+      [this](const boost::system::error_code &) { timerHandler(); });
 }
 
 } // namespace aniray

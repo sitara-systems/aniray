@@ -47,50 +47,49 @@ namespace aniray {
 NodeArrayOutputOLAThread::NodeArrayOutputOLAThread(const Options &options)
     : ola::thread::Thread(options) {}
 
-auto NodeArrayOutputOLAThread::Start(const ola::TimeInterval &period,
-            std::unordered_map<std::uint32_t, std::size_t> &universesToBuffers) -> bool {
-    mPeriod = period;
-    mUniversesToBuffers = universesToBuffers;
-    if (!mOLAClientWrapper.Setup()) {
+auto NodeArrayOutputOLAThread::Start(
+    const ola::TimeInterval &period,
+    std::unordered_map<std::uint32_t, std::size_t> &universesToBuffers)
+    -> bool {
+  mPeriod = period;
+  mUniversesToBuffers = universesToBuffers;
+  if (!mOLAClientWrapper.Setup()) {
     return false;
-    }
-    return ola::thread::Thread::Start();
+  }
+  return ola::thread::Thread::Start();
 }
 
 void NodeArrayOutputOLAThread::Stop() {
-    mOLAClientWrapper.GetSelectServer()->Terminate();
+  mOLAClientWrapper.GetSelectServer()->Terminate();
 }
 
-auto NodeArrayOutputOLAThread::GetSelectServer() -> ola::io::SelectServer* {
-    return mOLAClientWrapper.GetSelectServer();
+auto NodeArrayOutputOLAThread::GetSelectServer() -> ola::io::SelectServer * {
+  return mOLAClientWrapper.GetSelectServer();
 }
 
 void NodeArrayOutputOLAThread::updateData(std::vector<ola::DmxBuffer> buffers) {
-    const std::lock_guard<std::mutex> lock(mUpdateMutex);
-    mBuffers = std::move(buffers);
+  const std::lock_guard<std::mutex> lock(mUpdateMutex);
+  mBuffers = std::move(buffers);
 }
 
-auto NodeArrayOutputOLAThread::Run() -> void* {
-    mOLAClientWrapper.GetSelectServer()->RegisterRepeatingTimeout(
-    mPeriod,
-    ola::NewCallback(
-        this,
-        &NodeArrayOutputOLAThread::InternalSendUniverses));
-    mOLAClientWrapper.GetSelectServer()->Run();
-    return nullptr;
+auto NodeArrayOutputOLAThread::Run() -> void * {
+  mOLAClientWrapper.GetSelectServer()->RegisterRepeatingTimeout(
+      mPeriod,
+      ola::NewCallback(this, &NodeArrayOutputOLAThread::InternalSendUniverses));
+  mOLAClientWrapper.GetSelectServer()->Run();
+  return nullptr;
 }
 
 auto NodeArrayOutputOLAThread::InternalSendUniverses() -> bool {
-    auto *olaClient = mOLAClientWrapper.GetClient();
-    const std::lock_guard<std::mutex> lock(mUpdateMutex);
-    for (auto const &[universe, i] : mUniversesToBuffers) {
+  auto *olaClient = mOLAClientWrapper.GetClient();
+  const std::lock_guard<std::mutex> lock(mUpdateMutex);
+  for (auto const &[universe, i] : mUniversesToBuffers) {
     if (i >= mBuffers.size()) {
-        continue;
+      continue;
     }
     olaClient->SendDMX(universe, mBuffers[i], ola::client::SendDMXArgs());
-    }
-    return true;
+  }
+  return true;
 }
 
 } // namespace aniray
-

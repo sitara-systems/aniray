@@ -140,9 +140,9 @@ public:
   NodeArray(std::vector<NodeT> nodes)
       : NodeArray(nodes, std::map<std::string, std::vector<size_t>>{}) {}
   // nodes and groups as tuple
-  NodeArray(std::tuple<std::vector<NodeT>,
-                       std::map<std::string, std::vector<size_t>>>
-                nodesAndGroups)
+  NodeArray(
+      std::tuple<std::vector<NodeT>, std::map<std::string, std::vector<size_t>>>
+          nodesAndGroups)
       : NodeArray(std::get<0>(nodesAndGroups), std::get<1>(nodesAndGroups)) {}
   // csv file
   NodeArray(const std::string &filename) : NodeArray{nodesFromCSV(filename)} {}
@@ -156,36 +156,27 @@ public:
     }
   }
 
-  [[nodiscard]] auto center() const -> Point {
-    return mCenter;
-  }
+  [[nodiscard]] auto center() const -> Point { return mCenter; }
 
-  [[nodiscard]] auto envelope() const -> Box {
-    return mEnvelope;
-  }
+  [[nodiscard]] auto envelope() const -> Box { return mEnvelope; }
 
-  [[nodiscard]] auto hash() const -> std::string {
-    return mHash;
-  }
+  [[nodiscard]] auto hash() const -> std::string { return mHash; }
 
-  auto groups() -> std::map<std::string, std::vector<std::shared_ptr<NodeT>>> & {
+  auto groups()
+      -> std::map<std::string, std::vector<std::shared_ptr<NodeT>>> & {
     return mGroups;
   }
 
-  [[nodiscard]] auto inGrid() const ->bool {
-    return mInGrid;
-  }
+  [[nodiscard]] auto inGrid() const -> bool { return mInGrid; }
 
   [[nodiscard]] auto gridIndexMax() const -> PointGridIndex {
     return mGridIndexMax;
   }
 
-  auto nodes() -> std::vector<std::shared_ptr<NodeT>> & {
-    return mNodes;
-  }
+  auto nodes() -> std::vector<std::shared_ptr<NodeT>> & { return mNodes; }
 
-  auto nodeGroupsToString(std::shared_ptr<NodeT> node,
-                           std::string *groupsStr) -> size_t {
+  auto nodeGroupsToString(std::shared_ptr<NodeT> node, std::string *groupsStr)
+      -> size_t {
     std::ostringstream groups;
     size_t count = 0;
     for (auto const &[groupName, groupNodes] : mGroups) {
@@ -263,13 +254,13 @@ public:
     file.close();
   }
 
-  template <typename onFindFunc> void findNodesInRadiusOfSource(
-      Point sourceCoords, onFindFunc&& onFind) {
-        findNodesInRadiusOfSource(sourceCoords, onFind, false, 0);
-      }
-  template <typename onFindFunc> void findNodesInRadiusOfSource(
-      Point sourceCoords, onFindFunc&& onFind, bool customRadius,
-      double sampleRadius) {
+  template <typename onFindFunc>
+  void findNodesInRadiusOfSource(Point sourceCoords, onFindFunc &&onFind) {
+    findNodesInRadiusOfSource(sourceCoords, onFind, false, 0);
+  }
+  template <typename onFindFunc>
+  void findNodesInRadiusOfSource(Point sourceCoords, onFindFunc &&onFind,
+                                 bool customRadius, double sampleRadius) {
     static std::map<double, double> comparableDistances;
     for (std::shared_ptr<NodeT> targetNode : mNodes) {
       if (targetNode->ignore()) {
@@ -330,12 +321,13 @@ private:
       -> std::tuple<std::vector<NodeT>,
                     std::map<std::string, std::vector<size_t>>> {
     std::vector<NodeT> nodes;
-    io::CSVReader<ANIRAY_NODES_FROM_CSV_NUM_COLUMNS,
-                  io::trim_chars<' ', '\t'>, io::double_quote_escape<',', '"'>>
+    io::CSVReader<ANIRAY_NODES_FROM_CSV_NUM_COLUMNS, io::trim_chars<' ', '\t'>,
+                  io::double_quote_escape<',', '"'>>
         in(filename);
     in.read_header(io::ignore_extra_column, "universe", "startAddr", "x", "y",
-                   "z", "xDeg", "yDeg", "zDeg", "ignore", "sampleRadius", "groups",
-                   "inGrid", "gridIndexX", "gridIndexY", "gridIndexZ");
+                   "z", "xDeg", "yDeg", "zDeg", "ignore", "sampleRadius",
+                   "groups", "inGrid", "gridIndexX", "gridIndexY",
+                   "gridIndexZ");
     uint32_t universe = 0;
     uint8_t startAddr = 0;
     double x = 0;
@@ -403,8 +395,7 @@ private:
     return std::make_tuple(nodes, groups);
   }
   auto nodeGridFromTargetSpacing(NodeArray &targetNodeArray, bool useCache,
-                                  double spacing)
-      -> std::vector<NodeT> {
+                                 double spacing) -> std::vector<NodeT> {
     if (useCache) {
       std::string cacheName = getCacheName(spacing, targetNodeArray.mHash);
       if (std::filesystem::exists(cacheName)) {
@@ -437,8 +428,12 @@ private:
           double z = static_cast<double>(k) * spacing + gridStart.z();
           Point newPoint(x, y, z);
           targetNodeArray.findNodesInRadiusOfSource(
-              newPoint, [newPoint, &nodes, i, j, k]([[maybe_unused]] std::shared_ptr<NodeT> targetNode) mutable -> bool {
-                nodes.push_back(NodeT(newPoint, Point(0, 0, 0), PointGridIndex(i, j, k)));
+              newPoint,
+              [newPoint, &nodes, i, j,
+               k]([[maybe_unused]] std::shared_ptr<NodeT> targetNode) mutable
+              -> bool {
+                nodes.push_back(
+                    NodeT(newPoint, Point(0, 0, 0), PointGridIndex(i, j, k)));
                 return true;
               });
         }
